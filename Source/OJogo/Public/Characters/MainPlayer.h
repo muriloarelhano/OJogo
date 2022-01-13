@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MainPlayer.generated.h"
@@ -18,7 +19,6 @@ public:
 	AMainPlayer();
 
 protected:
-
 	// Components
 	//Spring Arm Component to follow the camera behind the player
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -26,23 +26,33 @@ protected:
 
 	//Player follow camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UCameraComponent* CameraComp; 
+	UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timeline")
+	UCurveFloat* SprintVelocityCurve;
+
+	UPROPERTY()
+	FTimeline CurveTimeline;
+	
+	FOnTimelineFloat SprintTimelineCallback;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-    // Movement Functions
-    void MoveForward(float AxisValue );
-    void MoveRight(float AxisValue );
+
+	UFUNCTION()
+	void UpdateSprintPlayerVelocity(float Value);
+
+	// Movement Functions
+	void MoveForward(float AxisValue);
+	void MoveRight(float AxisValue);
 	void BeginSprint();
 	void EndSprint();
 	void BeginCrouch();
 	void EndCrouch();
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

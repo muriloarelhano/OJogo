@@ -29,12 +29,14 @@ AMainPlayer::AMainPlayer()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bIgnoreBaseRotation = true;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
 // Called every frame
 void AMainPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	CurveTimeline.TickTimeline((DeltaTime));
 }
 
 
@@ -42,6 +44,18 @@ void AMainPlayer::Tick(float DeltaTime)
 void AMainPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SprintTimelineCallback.BindDynamic(this, &AMainPlayer::UpdateSprintPlayerVelocity);
+	
+	if (SprintVelocityCurve)
+	{
+		CurveTimeline.AddInterpFloat(SprintVelocityCurve, SprintTimelineCallback);
+	}
+}
+
+void AMainPlayer::UpdateSprintPlayerVelocity(float Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Value;
 }
 
 void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -59,7 +73,7 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMainPlayer::EndSprint);
 }
 
-void AMainPlayer::MoveForward(float AxisValue )
+void AMainPlayer::MoveForward(float AxisValue)
 {
 	if ((Controller != nullptr) && (AxisValue != 0.0f))
 	{
@@ -91,12 +105,14 @@ void AMainPlayer::MoveRight(float AxisValue)
 
 void AMainPlayer::BeginSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+	// GetCharacterMovement()->MaxWalkSpeed = 800.0f;
+	CurveTimeline.PlayFromStart();
 }
 
 void AMainPlayer::EndSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	//GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	CurveTimeline.Reverse();
 }
 
 void AMainPlayer::BeginCrouch()
