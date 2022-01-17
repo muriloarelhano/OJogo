@@ -4,6 +4,7 @@
 #include "Characters/MainPlayer.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Interfaces/InteractableInterface.h"
 
 // Sets default values
 AMainPlayer::AMainPlayer()
@@ -37,6 +38,7 @@ void AMainPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CurveTimeline.TickTimeline((DeltaTime));
+	GenerateRaycast();
 }
 
 
@@ -46,7 +48,7 @@ void AMainPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	SprintTimelineCallback.BindDynamic(this, &AMainPlayer::UpdateSprintPlayerVelocity);
-	
+
 	if (SprintVelocityCurve)
 	{
 		CurveTimeline.AddInterpFloat(SprintVelocityCurve, SprintTimelineCallback);
@@ -61,16 +63,23 @@ void AMainPlayer::UpdateSprintPlayerVelocity(float Value)
 void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Movement Axis
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMainPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainPlayer::MoveRight);
 	PlayerInputComponent->BindAxis("TurnUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("TurnRight", this, &APawn::AddControllerYawInput);
+
+	// Movement Actions
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMainPlayer::BeginCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AMainPlayer::EndCrouch);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMainPlayer::BeginSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMainPlayer::EndSprint);
+
+	// Gameplay Actions
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainPlayer::Interact);
 }
 
 void AMainPlayer::MoveForward(float AxisValue)
@@ -123,4 +132,47 @@ void AMainPlayer::BeginCrouch()
 void AMainPlayer::EndCrouch()
 {
 	UnCrouch();
+}
+
+FVector AMainPlayer::CalculateRaycastEnd()
+{
+	this->GetController()->GetPlayerViewPoint(
+		OUT PlayerViewPointLocation,
+		OUT PlayerViewPointRotation
+	);
+
+	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * InteractDistance;
+}
+
+void AMainPlayer::GenerateRaycast()
+{
+	FHitResult HitResult;
+	FVector EndLocation = CalculateRaycastEnd();
+
+	if (GetWorld())
+	{
+		bool actorHit = GetWorld()->LineTraceSingleByChannel(HitResult, PlayerViewPointLocation, EndLocation,
+		                                                     ECC_WorldDynamic, FCollisionQueryParams(),
+		                                                     FCollisionResponseParams());
+
+		if (actorHit && HitResult.GetActor())
+		{
+			if (HitResult.GetActor()->Implements<UInteractableInterface>())
+			{
+				CurrentInteractableObject = HitResult.GetActor();
+			}else
+			{
+				CurrentInteractableObject = nullptr;
+			}
+		}
+	}
+}
+
+void AMainPlayer::Interact()
+{
+	if (CurrentInteractableObject)
+	{
+		IInteractableInterface* InteractableActor = Cast<IInteractableInterface>(CurrentInteractableObject);
+		InteractableActor->InteractWith(this);
+	}
 }

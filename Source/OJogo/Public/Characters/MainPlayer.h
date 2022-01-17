@@ -7,6 +7,7 @@
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Interfaces/InteractableInterface.h"
 #include "MainPlayer.generated.h"
 
 UCLASS()
@@ -31,11 +32,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timeline")
 	UCurveFloat* SprintVelocityCurve;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")
+	float InteractDistance = 400.0f;
+
 	UPROPERTY()
 	FTimeline CurveTimeline;
-	
+
+	UPROPERTY()
 	FOnTimelineFloat SprintTimelineCallback;
+
+	UPROPERTY()
+	FVector PlayerViewPointLocation;
 	
+	UPROPERTY()
+	FRotator PlayerViewPointRotation;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Interaction")
+	AActor* CurrentInteractableObject;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -49,6 +63,14 @@ protected:
 	void EndSprint();
 	void BeginCrouch();
 	void EndCrouch();
+
+	// Raycast Functions
+	FVector CalculateRaycastEnd();
+	void GenerateRaycast();
+	
+	// Interaction Functions
+	void Interact();
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
