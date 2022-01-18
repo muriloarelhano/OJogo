@@ -7,6 +7,7 @@
 #include "Components/PlayerInventoryActorComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
+#include "NiagaraFunctionLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MainPlayer.generated.h"
 
@@ -64,6 +65,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Interaction")
 	AActor* CurrentInteractableObject;
 
+	UPROPERTY()
+	FTimerHandle TimeHandle_FireShot;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -79,9 +83,13 @@ protected:
 	void EndCrouch();
 
 	// Raycast Functions
-	FVector CalculateRaycastEnd();
+	FVector CalculateRaycastEnd(float Distance);
 	void GenerateRaycast();
 
 	// Interaction Functions
 	void Interact();
+	void StartFire();
+	void StopFire();
+	void FireShoot();
+	
 };

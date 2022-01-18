@@ -34,11 +34,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Actions")
 	void SwitchCurrentWeapon();
-                                
-                                protected:
-                                	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Inventory")
-                                	ABaseWaepon* CurrentWeapon = nullptr;
-                                	
-                                	// Called when the game starts
-                                	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	ABaseWaepon* GetCurrentWeapon();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Inventory")
+	ABaseWaepon* CurrentWeapon;
+
+	// Called when the game starts
+	virtual void BeginPlay() override;
 };

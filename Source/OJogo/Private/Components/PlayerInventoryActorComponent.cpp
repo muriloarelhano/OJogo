@@ -34,6 +34,11 @@ void UPlayerInventoryActorComponent::SwitchCurrentWeapon()
 {
 }
 
+ABaseWaepon* UPlayerInventoryActorComponent::GetCurrentWeapon()
+{
+	return CurrentWeapon;
+}
+
 void UPlayerInventoryActorComponent::SetCurrentWeapon(ABaseWaepon* Weapon)
 {
 	CurrentWeapon = Weapon;

@@ -3,8 +3,11 @@
 
 #include "Characters/MainPlayer.h"
 
+#include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/InteractableInterface.h"
+#include "Kismet/GameplayStatics.h"
+#include "Math/TransformCalculus3D.h"
 
 // Sets default values
 AMainPlayer::AMainPlayer()
@@ -85,6 +88,8 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainPlayer::Interact);
 	PlayerInputComponent->BindAction("Drop", IE_Pressed, this->InventoryActorComponent,
 	                                 &UPlayerInventoryActorComponent::DropCurrentWeapon);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMainPlayer::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMainPlayer::StopFire);
 }
 
 void AMainPlayer::MoveForward(float AxisValue)
@@ -139,20 +144,20 @@ void AMainPlayer::EndCrouch()
 	UnCrouch();
 }
 
-FVector AMainPlayer::CalculateRaycastEnd()
+FVector AMainPlayer::CalculateRaycastEnd(float Distance)
 {
 	this->GetController()->GetPlayerViewPoint(
 		OUT PlayerViewPointLocation,
 		OUT PlayerViewPointRotation
 	);
 
-	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * InteractDistance;
+	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Distance;
 }
 
 void AMainPlayer::GenerateRaycast()
 {
 	FHitResult HitResult;
-	FVector EndLocation = CalculateRaycastEnd();
+	FVector EndLocation = CalculateRaycastEnd(InteractDistance);
 
 	if (GetWorld())
 	{
@@ -180,6 +185,63 @@ void AMainPlayer::Interact()
 	{
 		IInteractableInterface* InteractableActor = Cast<IInteractableInterface>(CurrentInteractableObject);
 		InteractableActor->InteractWith(this);
+	}
+}
+
+void AMainPlayer::StartFire()
+{
+	if (InventoryActorComponent->IsPlayerArmed())
+	{
+		FireShoot();
+		GetWorldTimerManager().SetTimer(TimeHandle_FireShot, this, &AMainPlayer::FireShoot,
+		                                InventoryActorComponent->GetCurrentWeapon()->FireRate, true);
+	}
+}
+
+void AMainPlayer::StopFire()
+{
+	if (InventoryActorComponent->IsPlayerArmed())
+	{
+		GetWorldTimerManager().ClearTimer(TimeHandle_FireShot);
+	}
+}
+
+void AMainPlayer::FireShoot()
+{
+	if (!InventoryActorComponent->GetCurrentWeapon()) { return; }
+
+	FHitResult Hit;
+	FVector EndLocation = CalculateRaycastEnd(InventoryActorComponent->GetCurrentWeapon()->Range);
+	FCollisionQueryParams QueryParams = FCollisionQueryParams(SCENE_QUERY_STAT(WeaponTrace), false, this);
+
+	FTransform Weapon = InventoryActorComponent->GetCurrentWeapon()->SkeletalMesh->GetSocketTransform(
+		FName("Muzzle"));
+
+
+	if (GetWorld())
+	{
+		bool actorHit = GetWorld()->LineTraceSingleByChannel(Hit, PlayerViewPointLocation, EndLocation,
+		                                                     ECC_WorldDynamic, QueryParams, FCollisionResponseParams());
+		DrawDebugLine(GetWorld(), PlayerViewPointLocation, EndLocation, FColor::Red, false, 1.f, 0, 1.f);
+		if (actorHit && InventoryActorComponent->GetCurrentWeapon()->ImpactParticle)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(), InventoryActorComponent->GetCurrentWeapon()->ImpactParticle,
+				Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+		}
+	}
+
+	if (InventoryActorComponent->GetCurrentWeapon()->MuzzleParticle)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(), InventoryActorComponent->GetCurrentWeapon()->MuzzleParticle, Weapon.GetLocation(),
+			Weapon.Rotator());
+	}
+
+	if (InventoryActorComponent->GetCurrentWeapon()->FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, InventoryActorComponent->GetCurrentWeapon()->FireSound,
+		                                      Weapon.GetLocation());
 	}
 }
 

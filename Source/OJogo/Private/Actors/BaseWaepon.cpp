@@ -49,6 +49,7 @@ void ABaseWaepon::Drop()
 }
 
 
+
 void ABaseWaepon::LookAt()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Uhuuuu"));
