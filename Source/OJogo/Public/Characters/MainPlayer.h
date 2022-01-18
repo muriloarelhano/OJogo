@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
+#include "Components/PlayerInventoryActorComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Interfaces/InteractableInterface.h"
 #include "MainPlayer.generated.h"
 
 UCLASS()
@@ -19,6 +19,17 @@ public:
 	// Sets default values for this character's properties
 	AMainPlayer();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//Getters
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	UPlayerInventoryActorComponent* GetInventory();
+
+
 protected:
 	// Components
 	//Spring Arm Component to follow the camera behind the player
@@ -28,6 +39,9 @@ protected:
 	//Player follow camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
+	UPlayerInventoryActorComponent* InventoryActorComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timeline")
 	UCurveFloat* SprintVelocityCurve;
@@ -43,11 +57,11 @@ protected:
 
 	UPROPERTY()
 	FVector PlayerViewPointLocation;
-	
+
 	UPROPERTY()
 	FRotator PlayerViewPointRotation;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Interaction")
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Interaction")
 	AActor* CurrentInteractableObject;
 
 	// Called when the game starts or when spawned
@@ -67,14 +81,7 @@ protected:
 	// Raycast Functions
 	FVector CalculateRaycastEnd();
 	void GenerateRaycast();
-	
+
 	// Interaction Functions
 	void Interact();
-	
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

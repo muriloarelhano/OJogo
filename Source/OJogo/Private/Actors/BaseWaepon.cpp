@@ -14,7 +14,6 @@ ABaseWaepon::ABaseWaepon()
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(RootComponent);
 	SkeletalMesh->SetSimulatePhysics(true);
-	
 }
 
 // Called when the game starts or when spawned
@@ -22,7 +21,6 @@ void ABaseWaepon::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 // Called every frame
 void ABaseWaepon::Tick(float DeltaTime)
@@ -37,10 +35,19 @@ void ABaseWaepon::InteractWith(AActor* Actor)
 		SkeletalMesh->SetSimulatePhysics(false);
 		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SkeletalMesh->AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		                          FName("RightHandMiddleSocket"));
-		
+		                                FName("RightHandMiddleSocket"));
+		this->IsDropped = false;
+		Player->GetInventory()->SetCurrentWeapon(this);
 	}
 }
+
+void ABaseWaepon::Drop()
+{
+	this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	SkeletalMesh->SetSimulatePhysics(true);
+	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
 
 void ABaseWaepon::LookAt()
 {

@@ -31,6 +31,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
 	float Distance = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
+	bool IsDropped = true;
+
+	void Drop();
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -38,5 +43,6 @@ public:
 	virtual void InteractWith(AActor* Actor) override;
 
 	virtual void LookAt() override;
+	
 
 };

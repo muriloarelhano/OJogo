@@ -26,6 +26,9 @@ AMainPlayer::AMainPlayer()
 	//Setting class variables of the spring arm
 	SpringArmComp->bUsePawnControlRotation = true;
 
+	//Actor Components
+	InventoryActorComponent = CreateDefaultSubobject<UPlayerInventoryActorComponent>(TEXT("InventoryComponent"));
+
 	//Setting class variables of the Character movement component
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -80,6 +83,8 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	// Gameplay Actions
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainPlayer::Interact);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, this->InventoryActorComponent,
+	                                 &UPlayerInventoryActorComponent::DropCurrentWeapon);
 }
 
 void AMainPlayer::MoveForward(float AxisValue)
@@ -160,7 +165,8 @@ void AMainPlayer::GenerateRaycast()
 			if (HitResult.GetActor()->Implements<UInteractableInterface>())
 			{
 				CurrentInteractableObject = HitResult.GetActor();
-			}else
+			}
+			else
 			{
 				CurrentInteractableObject = nullptr;
 			}
@@ -175,4 +181,10 @@ void AMainPlayer::Interact()
 		IInteractableInterface* InteractableActor = Cast<IInteractableInterface>(CurrentInteractableObject);
 		InteractableActor->InteractWith(this);
 	}
+}
+
+
+UPlayerInventoryActorComponent* AMainPlayer::GetInventory()
+{
+	return InventoryActorComponent;
 }
