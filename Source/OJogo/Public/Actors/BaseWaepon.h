@@ -40,7 +40,7 @@ public:
 	UNiagaraSystem* MuzzleParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
-	float FireRate = 50.0f;
+	float FireRate = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
 	float Range = 1000.0f;

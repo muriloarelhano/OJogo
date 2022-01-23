@@ -193,8 +193,8 @@ void AMainPlayer::StartFire()
 	if (InventoryActorComponent->IsPlayerArmed())
 	{
 		FireShoot();
-		GetWorldTimerManager().SetTimer(TimeHandle_FireShot, this, &AMainPlayer::FireShoot,
-		                                InventoryActorComponent->GetCurrentWeapon()->FireRate, true);
+		GetWorld()->GetTimerManager().SetTimer(TimeHandle_FireShot, this, &AMainPlayer::FireShoot,
+		                                       60 / InventoryActorComponent->GetCurrentWeapon()->FireRate, true);
 	}
 }
 
@@ -202,7 +202,7 @@ void AMainPlayer::StopFire()
 {
 	if (InventoryActorComponent->IsPlayerArmed())
 	{
-		GetWorldTimerManager().ClearTimer(TimeHandle_FireShot);
+		GetWorld()->GetTimerManager().ClearTimer(TimeHandle_FireShot);
 	}
 }
 
@@ -216,7 +216,7 @@ void AMainPlayer::FireShoot()
 
 	FTransform Weapon = InventoryActorComponent->GetCurrentWeapon()->SkeletalMesh->GetSocketTransform(
 		FName("Muzzle"));
-
+	DrawDebugLine(GetWorld(), PlayerViewPointLocation, EndLocation, FColor::Red, false, 2, 0, 1);
 
 	if (GetWorld())
 	{
