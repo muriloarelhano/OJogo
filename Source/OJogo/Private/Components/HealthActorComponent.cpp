@@ -41,12 +41,16 @@ void UHealthActorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UHealthActorComponent::TakeDamage(AActor* DamagedActor, float Damage,
                                        const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage <= 0)
+	if (Health <= 0)
+	{
+		Die();
 		return;
-
-	Health -= Damage;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Appling Damage, Health: %f"), Health)
+	Health = Health - Damage;
 }
 
 void UHealthActorComponent::Die()
 {
+	this->GetOwner()->Destroy();
 }

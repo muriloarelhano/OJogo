@@ -8,6 +8,7 @@
 #include "Interfaces/InteractableInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/TransformCalculus3D.h"
+#include "Utils/UtilitiesBPFunctionLibrary.h"
 
 // Sets default values
 AMainPlayer::AMainPlayer()
@@ -44,9 +45,8 @@ void AMainPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CurveTimeline.TickTimeline((DeltaTime));
-	GenerateRaycast();
+	CheckLookingAtInteractableObject();
 }
-
 
 // Called when the game starts or when spawned
 void AMainPlayer::BeginPlay()
@@ -144,20 +144,11 @@ void AMainPlayer::EndCrouch()
 	UnCrouch();
 }
 
-FVector AMainPlayer::CalculateRaycastEnd(float Distance)
-{
-	this->GetController()->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation,
-		OUT PlayerViewPointRotation
-	);
-
-	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Distance;
-}
-
-void AMainPlayer::GenerateRaycast()
+void AMainPlayer::CheckLookingAtInteractableObject()
 {
 	FHitResult HitResult;
-	FVector EndLocation = CalculateRaycastEnd(InteractDistance);
+	FVector EndLocation = UUtilitiesBPFunctionLibrary::CalculateRaycastEnd(
+		this->GetController(), InteractDistance, PlayerViewPointLocation, PlayerViewPointRotation);
 
 	if (GetWorld())
 	{
@@ -190,10 +181,12 @@ void AMainPlayer::Interact()
 
 void AMainPlayer::StartFire()
 {
+	CurveTimeline.Reverse();
 	if (InventoryActorComponent->IsPlayerArmed())
 	{
-		FireShoot();
-		GetWorld()->GetTimerManager().SetTimer(TimeHandle_FireShot, this, &AMainPlayer::FireShoot,
+		InventoryActorComponent->GetCurrentWeapon()->Shoot();
+		GetWorld()->GetTimerManager().SetTimer(TimeHandle_FireShot, InventoryActorComponent->GetCurrentWeapon(),
+		                                       &ABaseWaepon::Shoot,
 		                                       60 / InventoryActorComponent->GetCurrentWeapon()->FireRate, true);
 	}
 }
@@ -205,46 +198,6 @@ void AMainPlayer::StopFire()
 		GetWorld()->GetTimerManager().ClearTimer(TimeHandle_FireShot);
 	}
 }
-
-void AMainPlayer::FireShoot()
-{
-	if (!InventoryActorComponent->GetCurrentWeapon()) { return; }
-
-	FHitResult Hit;
-	FVector EndLocation = CalculateRaycastEnd(InventoryActorComponent->GetCurrentWeapon()->Range);
-	FCollisionQueryParams QueryParams = FCollisionQueryParams(SCENE_QUERY_STAT(WeaponTrace), false, this);
-
-	FTransform Weapon = InventoryActorComponent->GetCurrentWeapon()->SkeletalMesh->GetSocketTransform(
-		FName("Muzzle"));
-	DrawDebugLine(GetWorld(), PlayerViewPointLocation, EndLocation, FColor::Red, false, 2, 0, 1);
-
-	if (GetWorld())
-	{
-		bool actorHit = GetWorld()->LineTraceSingleByChannel(Hit, PlayerViewPointLocation, EndLocation,
-		                                                     ECC_WorldDynamic, QueryParams, FCollisionResponseParams());
-		DrawDebugLine(GetWorld(), PlayerViewPointLocation, EndLocation, FColor::Red, false, 1.f, 0, 1.f);
-		if (actorHit && InventoryActorComponent->GetCurrentWeapon()->ImpactParticle)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				GetWorld(), InventoryActorComponent->GetCurrentWeapon()->ImpactParticle,
-				Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
-		}
-	}
-
-	if (InventoryActorComponent->GetCurrentWeapon()->MuzzleParticle)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(), InventoryActorComponent->GetCurrentWeapon()->MuzzleParticle, Weapon.GetLocation(),
-			Weapon.Rotator());
-	}
-
-	if (InventoryActorComponent->GetCurrentWeapon()->FireSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, InventoryActorComponent->GetCurrentWeapon()->FireSound,
-		                                      Weapon.GetLocation());
-	}
-}
-
 
 UPlayerInventoryActorComponent* AMainPlayer::GetInventory()
 {

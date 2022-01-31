@@ -30,6 +30,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	UPlayerInventoryActorComponent* GetInventory();
 
+	UPROPERTY()
+	FVector PlayerViewPointLocation;
+
+	UPROPERTY()
+	FRotator PlayerViewPointRotation;
+
 
 protected:
 	// Components
@@ -56,12 +62,6 @@ protected:
 	UPROPERTY()
 	FOnTimelineFloat SprintTimelineCallback;
 
-	UPROPERTY()
-	FVector PlayerViewPointLocation;
-
-	UPROPERTY()
-	FRotator PlayerViewPointRotation;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Interaction")
 	AActor* CurrentInteractableObject;
 
@@ -82,14 +82,10 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 
-	// Raycast Functions
-	FVector CalculateRaycastEnd(float Distance);
-	void GenerateRaycast();
-
 	// Interaction Functions
+	void CheckLookingAtInteractableObject();
 	void Interact();
 	void StartFire();
 	void StopFire();
-	void FireShoot();
 	
 };

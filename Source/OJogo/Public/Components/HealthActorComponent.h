@@ -16,7 +16,6 @@ public:
 	// Sets default values for this component's properties
 	UHealthActorComponent();
 
-protected:
 	// Attr
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 	float DefaultHealth = 100.0f;
@@ -25,8 +24,10 @@ protected:
 	float Health;
 
 
+protected:
 	UFUNCTION()
-	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
+	                class AController* InstigatedBy, AActor* DamageCauser);
 
 	UFUNCTION(BlueprintCallable)
 	void Die();

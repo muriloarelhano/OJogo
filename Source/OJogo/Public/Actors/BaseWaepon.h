@@ -24,20 +24,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Base SkeletalMesh")
 	USkeletalMeshComponent* SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
 	TSubclassOf<ABaseProjectileActor> Projectile;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
-	USoundBase* FireSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
-	UNiagaraSystem* ImpactParticle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
-	UNiagaraSystem* MuzzleParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
 	float FireRate = 100.0f;
@@ -45,10 +36,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
 	float Range = 1000.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon Attributes")
+	float Damage = 25.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon FX")
+	USoundBase* FireSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon FX")
+	UNiagaraSystem* ImpactParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon FX")
+	UNiagaraSystem* MuzzleParticle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon State")
 	bool IsDropped = true;
 
+	UFUNCTION()
 	void Drop();
+
+	UFUNCTION()
+	void Shoot();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
