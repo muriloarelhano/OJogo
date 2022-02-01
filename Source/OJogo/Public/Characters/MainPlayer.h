@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
+#include "Components/HealthActorComponent.h"
 #include "Components/PlayerInventoryActorComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
-#include "NiagaraFunctionLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MainPlayer.generated.h"
 
@@ -30,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	UPlayerInventoryActorComponent* GetInventory();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
+	UHealthActorComponent* HealthComponent;
+
+
 	UPROPERTY()
 	FVector PlayerViewPointLocation;
 
@@ -49,7 +53,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
 	UPlayerInventoryActorComponent* InventoryActorComponent;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Timeline")
 	UCurveFloat* SprintVelocityCurve;
 

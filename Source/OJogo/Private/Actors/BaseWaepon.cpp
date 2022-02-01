@@ -8,6 +8,7 @@
 #include "Components/HealthActorComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/UtilitiesBPFunctionLibrary.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 ABaseWaepon::ABaseWaepon()

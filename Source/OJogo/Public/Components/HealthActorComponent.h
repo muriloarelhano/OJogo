@@ -23,6 +23,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Health")
 	float Health;
 
+	UPROPERTY()
+	bool IsAlreadyDead = false;
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsDead() const;
 
 protected:
 	UFUNCTION()
@@ -31,8 +36,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Die();
-
-
+	
 	// Called when the game starts
 	virtual void BeginPlay() override;
 

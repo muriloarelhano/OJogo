@@ -3,6 +3,9 @@
 
 #include "Components/HealthActorComponent.h"
 
+#include "Characters/MainPlayer.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -41,16 +44,25 @@ void UHealthActorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UHealthActorComponent::TakeDamage(AActor* DamagedActor, float Damage,
                                        const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Health <= 0)
-	{
-		Die();
-		return;
-	}
+	if (Health <= 0) { Die(); }
 	UE_LOG(LogTemp, Warning, TEXT("Appling Damage, Health: %f"), Health)
 	Health = Health - Damage;
 }
 
 void UHealthActorComponent::Die()
 {
-	this->GetOwner()->Destroy();
+	AMainPlayer* Player = Cast<AMainPlayer>(GetOwner());
+	if (Player && !IsAlreadyDead)
+	{
+		Player->GetMesh()->WakeAllRigidBodies();
+		Player->GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Player->GetMesh()->SetSimulatePhysics(true);;
+		Player->GetCharacterMovement()->DisableMovement();
+		IsAlreadyDead = true;
+	}
+}
+
+bool UHealthActorComponent::IsDead() const
+{
+	return Health <= 0;
 }

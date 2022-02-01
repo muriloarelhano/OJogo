@@ -27,11 +27,13 @@ AMainPlayer::AMainPlayer()
 	SpringArmComp->SetupAttachment(GetMesh());
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 
+
 	//Setting class variables of the spring arm
 	SpringArmComp->bUsePawnControlRotation = true;
 
 	//Actor Components
 	InventoryActorComponent = CreateDefaultSubobject<UPlayerInventoryActorComponent>(TEXT("InventoryComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthActorComponent>(TEXT("HealthComponent"));
 
 	//Setting class variables of the Character movement component
 	GetCharacterMovement()->bOrientRotationToMovement = true;
