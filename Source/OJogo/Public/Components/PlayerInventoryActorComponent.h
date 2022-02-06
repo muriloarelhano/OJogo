@@ -27,15 +27,14 @@ public:
 	// Action Function
 	UFUNCTION(BlueprintCallable, Category="Inventory|Actions")
 	void SetCurrentWeapon(ABaseWaepon* Weapon);
-
-	// Action Function
+	
 	UFUNCTION(BlueprintCallable, Category="Inventory|Actions")
 	void DropCurrentWeapon();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Actions")
 	void SwitchCurrentWeapon();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Inventory|Actions")
 	ABaseWaepon* GetCurrentWeapon();
 
 protected:

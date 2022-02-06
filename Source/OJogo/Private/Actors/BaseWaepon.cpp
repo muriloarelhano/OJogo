@@ -37,19 +37,19 @@ void ABaseWaepon::InteractWith(AActor* Actor)
 {
 	if (AMainPlayer* Player = Cast<AMainPlayer>(Actor))
 	{
+		this->SetOwner(Player);
+		this->IsDropped = false;
+		Player->GetInventory()->SetCurrentWeapon(this);
 		SkeletalMesh->SetSimulatePhysics(false);
 		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SkeletalMesh->AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 		                                FName("RightHandMiddleSocket"));
-		this->SetOwner(Player);
-		this->IsDropped = false;
-		Player->GetInventory()->SetCurrentWeapon(this);
 	}
 }
 
 void ABaseWaepon::Drop()
 {
-	this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	Super::Drop();
 	SkeletalMesh->SetSimulatePhysics(true);
 	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
@@ -82,8 +82,11 @@ void ABaseWaepon::Shoot()
 					GetWorld(), ImpactParticle,
 					Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 			}
-
-			TSet<UActorComponent*> actorComponents = Hit.GetActor()->GetComponents();
+			TSet<UActorComponent*> actorComponents;
+			if (Hit.GetActor())
+			{
+				actorComponents = Hit.GetActor()->GetComponents();
+			}
 			if (!actorComponents.IsEmpty())
 			{
 				for (auto Component : actorComponents)

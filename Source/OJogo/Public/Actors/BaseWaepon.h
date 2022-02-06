@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BaseProjectileActor.h"
+#include "Item.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/Actor.h"
-#include "Interfaces/InteractableInterface.h"
 #include "Niagara/Classes/NiagaraSystem.h"
 #include "BaseWaepon.generated.h"
 
 UCLASS()
-class OJOGO_API ABaseWaepon : public AActor, public IInteractableInterface
+class OJOGO_API ABaseWaepon : public AItem
 {
 	GENERATED_BODY()
 
@@ -50,10 +49,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon State")
 	bool IsDropped = true;
-
-	UFUNCTION()
-	void Drop();
-
+	
 	UFUNCTION()
 	void Shoot();
 
@@ -61,6 +57,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void InteractWith(AActor* Actor) override;
-
 	virtual void LookAt() override;
+	virtual void Drop() override;
 };
